@@ -48,7 +48,6 @@ func Query(q string) {
 	params.Set("q", q)
 	params.Set("from", "en")
 	params.Set("to", "zh")
-	params.Set("appid", "20211109000994741")
 	params.Set("salt", salt)
 	params.Set("sign", md5str)
 	//如果参数中有中文参数,这个方法会进行URLEncode
