@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"crypto/rand"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"math/big"
@@ -20,10 +21,12 @@ var (
 )
 
 func init() {
-	saltlen = 10
-	appid = "appid"
+	flag.StringVar(&appid, "appid", "null", "百度翻译appid")
+	flag.StringVar(&key, "key", "null", "百度翻译密钥")
+	flag.IntVar(&saltlen, "saltlen", 10, "salt长度")
+	flag.Parse()
+	fmt.Printf("appid=%s, key=%s, saltlen=%d\n", appid, key, saltlen)
 	salt = createSalt(saltlen)
-	key = "key"
 }
 
 func createSalt(len int) string {
@@ -42,14 +45,15 @@ func createSalt(len int) string {
 func Query(q string) {
 	data := []byte(appid + q + salt + key)
 	has := md5.Sum(data)
-	md5str := fmt.Sprintf("%x", has)
+	sign := fmt.Sprintf("%x", has)
 	params := url.Values{}
 	Url, _ := url.Parse("https://fanyi-api.baidu.com/api/trans/vip/translate")
 	params.Set("q", q)
 	params.Set("from", "en")
 	params.Set("to", "zh")
+	params.Set("appid", appid)
 	params.Set("salt", salt)
-	params.Set("sign", md5str)
+	params.Set("sign", sign)
 	//如果参数中有中文参数,这个方法会进行URLEncode
 	Url.RawQuery = params.Encode()
 	urlPath := Url.String()
