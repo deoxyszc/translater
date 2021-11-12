@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/big"
 	"net/http"
 	"net/url"
@@ -42,7 +43,11 @@ func createSalt(len int) string {
 	return container
 }
 
-func Query(q string) {
+func GenerateQueryString(jsonMap map[string]interface{}) (string, int) {
+	return "null", 0
+}
+
+func Query(q string) map[string]string {
 	data := []byte(appid + q + salt + key)
 	has := md5.Sum(data)
 	sign := fmt.Sprintf("%x", has)
@@ -57,12 +62,18 @@ func Query(q string) {
 	//如果参数中有中文参数,这个方法会进行URLEncode
 	Url.RawQuery = params.Encode()
 	urlPath := Url.String()
-	fmt.Println(urlPath)
+	//fmt.Println(urlPath)
 	resp, _ := http.Get(urlPath)
-	defer resp.Body.Close()
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Fatalln("close body error!")
+		}
+	}()
 	body, _ := ioutil.ReadAll(resp.Body)
 	res := string(body)
-	fmt.Println(string(res))
+	//fmt.Println(string(res))
 	dst := GetTranslateResult(res)
-	fmt.Println(string(dst))
+	//fmt.Println(dst)
+	return dst
 }
